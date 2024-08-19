@@ -14,7 +14,7 @@ def run_command(command):
         print(f"Command failed with exit code {result.returncode}")
         sys.exit(1)
 
-def check_and_create_env(env_name, python_version, requirements=None):
+def check_and_create_env(env_name, python_version, requirements=None, nero_dir=None):
     result = subprocess.run(f"conda env list | grep {env_name}", shell=True, capture_output=True, text=True)
     if env_name in result.stdout:
         print(f"{env_name} environment already exists.")
@@ -24,8 +24,31 @@ def check_and_create_env(env_name, python_version, requirements=None):
         
         if env_name == "colmap_env":
             run_command(f"conda activate {env_name} && conda install -c conda-forge colmap -y")
-        elif env_name == "nero_env" and requirements:
+        elif env_name == "nero_env" and requirements and nero_dir:
             run_command(f"conda activate {env_name} && pip install -r {requirements}")
+
+            # Install nvdiffrast
+            nvdiffrast_dir = Path(nero_dir) / "nvdiffrast"
+            if nvdiffrast_dir.exists():
+                if not (nvdiffrast_dir / "setup.py").exists():
+                    print("nvdiffrast directory exists but seems incomplete. Removing and cloning repository...")
+                    shutil.rmtree(nvdiffrast_dir)
+                    run_command(f"cd {nero_dir} && git clone https://github.com/NVlabs/nvdiffrast")
+            else:
+                print("nvdiffrast directory not found. Cloning repository...")
+                run_command(f"cd {nero_dir} && git clone https://github.com/NVlabs/nvdiffrast")
+
+            run_command(f"cd {nvdiffrast_dir} && pip install .")
+
+            # Install raytracing
+            raytracing_dir = Path(nero_dir) / "raytracing"
+            if raytracing_dir.exists():
+                run_command(f"cd {raytracing_dir} && pip install .")
+            else:
+                print(f"Warning: raytracing directory not found at {raytracing_dir}")
+
+            # Return to original directory
+            run_command(f"cd {nero_dir}")
 
 def load_colmap():
     run_command("module load libs/nvidia-hpc-sdk/23.9")
@@ -38,7 +61,7 @@ def load_nero(nero_dir):
     run_command("module load apps/binapps/anaconda3/2022.10")
     run_command("module load libs/cuda/11.7.0")
     requirements_file = Path(nero_dir) / "requirements.txt"
-    check_and_create_env("nero_env", "3.10", requirements_file)
+    check_and_create_env("nero_env", "3.10", requirements_file, nero_dir)
     run_command("source activate nero_env")
     print("NERO env loaded!")
 
