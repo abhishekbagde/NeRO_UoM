@@ -1,61 +1,79 @@
-﻿# NeRO_UoM: Improved Neural Reflectance Optimization Pipeline
+# NeRO_UoM: Neural Reflectance Optimization for Cultural Heritage Digitization
 
-This repository contains improvements and additions to the original NeRO (Neural Reflectance Optimization) pipeline, specifically tailored for use at the University of Manchester.
+This repository hosts the enhanced NeRO (Neural Reflectance Optimization) pipeline, developed and tailored for cultural heritage digitization, specifically for the [John Rylands Library](https://www.library.manchester.ac.uk/rylands/) at the [University of Manchester](https://www.manchester.ac.uk/). The pipeline incorporates Structure-from-Motion (SfM) techniques, high-performance computing integration, and neural rendering to produce high-fidelity 3D models of artifacts.
 
 ## New Features
 
-- Automated environment setup for COLMAP and NeRO
-- Streamlined pipeline execution with minimal user input
-- Improved directory structure management
-- New script for end-to-end pipeline execution
+- **Parallelization and GPU Acceleration**: Optimized for batch processing in HPC environments using GPU acceleration.
+- **End-to-End Pipeline**: The workflow is streamlined for multi-stage processing (feature extraction, reconstruction, BRDF estimation).
+- **Enhanced Scalability**: Capable of handling large-scale datasets efficiently with [Computational Shared Facility (CSF)](https://www.itservices.manchester.ac.uk/research/csf/) integration.
+- **Automated Metadata Generation**: Uses machine learning for generating metadata to facilitate cataloging.
+- **User Interface Enhancements**: Simplified CLI with detailed logging for resource usage and debugging.
 
 ## Setup
 
-1. Clone this repository:
+1. **Clone this repository**:
    ```
    git clone https://github.com/abhishekbagde/NeRO_UoM.git
    cd NeRO_UoM
    ```
 
-2. Ensure you have Anaconda or Miniconda installed on your system.
+2. **Install Anaconda or Miniconda** on your system if not already installed.
 
-3. Prepare your image dataset in a separate folder.
+3. **Dataset Preparation**: Ensure images follow the directory structure:
+   ```
+   NeRO/data/custom/object_name/images/
+   ```
 
 ## Usage
 
-Run the pipeline script with:
+To execute the full pipeline, run:
 
 ```
 python nero_pipeline.py /path/to/image/folder /path/to/nero/directory
 ```
 
-The script will guide you through the entire process, from environment setup to final mesh extraction.
+The pipeline consists of the following stages:
+- **Feature Detection & Matching**: Initiates feature extraction with SIFT.
+  ```
+  nero_pipeline.py --dataset dataset_name --stage features
+  ```
+- **Sparse & Dense Reconstruction**: Generates a 3D point cloud and mesh.
+  ```
+  nero_pipeline.py --dataset dataset_name --stage reconstruction
+  ```
+- **BRDF Estimation**: Extracts material properties for realistic rendering.
+  ```
+  nero_pipeline.py --dataset dataset_name --stage nerf --brdf
+  ```
+- **Exporting the Model**: Exports the final model in OBJ/PLY format.
+  ```
+  nero_pipeline.py --dataset dataset_name --export-format obj ply
+  ```
 
 ## Requirements
 
-- Python 3.10
-- CUDA 11.7.0
-- COLMAP
-- NeRO dependencies (see requirements.txt in the NeRO directory)
+- Python 3.10+
+- CUDA 11.7
+- [COLMAP](https://colmap.github.io/)
+- NeRO dependencies (specified in `requirements.txt`)
+- University of Manchester’s [Computational Shared Facility (CSF)](https://www.itservices.manchester.ac.uk/research/csf/) for large-scale digitization
 
-## Key Changes
+## Key Enhancements
 
-- Automated environment setup for both COLMAP and NeRO
-- Streamlined directory structure management post-COLMAP processing
-- Enhanced error handling and user feedback throughout the pipeline
+- **HPC Integration**: Full integration with [CSF](https://www.itservices.manchester.ac.uk/research/csf/) for large-scale parallel processing, reducing time and carbon emissions.
+- **Improved Reconstruction Quality**: Integrates NeRF models for challenging surfaces, enhancing detail and material properties.
+- **Scalable Batch Processing**: Supports the digitization of multiple objects in parallel using the batch processing system.
 
-## Contributing
-
-Please read CONTRIBUTING.md for details on our code of conduct, and the process for submitting pull requests.
 
 ## License
 
-This project is licensed under the same license as the original NeRO project. Please see the LICENSE file for details.
+This project is licensed under the same terms as the original NeRO project. Refer to the `LICENSE` file for more information.
 
 ## Acknowledgments
 
-- Original NeRO project team
-- COLMAP developers
-- University of Manchester research team
+- [NeRO development team](https://github.com/zju3dv/NeRO)
+- [COLMAP](https://colmap.github.io/) and [VisualSFM](http://ccwu.me/vsfm/) developers
+- [John Rylands Library Digitization Project](https://www.library.manchester.ac.uk/rylands/), [University of Manchester](https://www.manchester.ac.uk/)
 
-For more detailed information about the original NeRO project, please refer to the [original repository](https://github.com/zju3dv/NeRO).
+For more information, refer to the detailed documentation in the thesis or the [original NeRO repository](https://github.com/zju3dv/NeRO).
